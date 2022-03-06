@@ -17,8 +17,8 @@ class CategoryController extends Controller
     {
         //fetch all category record
         $categories=Category::all();
-        if(is_null($categories)){
-            return response()->json(['Error'=>"Category Not Found!"]);
+        if(count($categories)==0){
+            return response()->json(['Error'=>"Categories Not Found!"]);
         }else{
              return response()->json(["data"=>$categories],200);
         }
@@ -104,10 +104,10 @@ class CategoryController extends Controller
 
         $category=Category::find($id);
         if(is_null($category)){
-            return response()->json(['Error'=>"You can't delete this category!"]);
+            return response()->json(['Error'=>"Category with id ".$id." Not Found!"],400);
         }else{
             Category:: where('category_id',$id)->delete();
-            return response()->json(["data" => "Category successfuly deleted!"]);
+            return response()->json(["data" => "Category successfuly deleted!"],200);
         }
     }
 }

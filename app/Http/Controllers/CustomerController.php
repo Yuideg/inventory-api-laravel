@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Customer;
+use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
 
 class CustomerController extends Controller
@@ -15,7 +16,12 @@ class CustomerController extends Controller
     public function index()
     {
         //
-        return Customer::all();
+        $customers=Customer::all();
+        if(count($customers)==0){
+            return response()->json(['Error'=>"Customers Not Found!"]);
+        }else{
+             return response()->json(["data"=>$customers],200);
+        }
 
     }
 
@@ -28,8 +34,15 @@ class CustomerController extends Controller
     public function store(Request $request)
     {
         //
-        return Customer::create($request->all());
-
+        $request->validate(
+            ['first_name'=>'required','last_name'=>'required','username'=>'required','password'=>'required','address'=>'required','email'=>'required','phone'=>'required','staff_id'=>'required']
+        );
+        try {
+            $customer=Customer::create($request->all());
+            return response()->json(["data"=>$customer], 200);
+        }catch(QueryException $e){
+            return response()->json(["Error"=>$e->getMessage()],400);
+        }
     }
 
     /**
@@ -41,7 +54,12 @@ class CustomerController extends Controller
     public function show($id)
     {
         //
-        return Customer::find($id);
+        $customer=Customer::find($id);
+        if(is_null($customer)){
+            return response()->json(['Error'=>"Customer Not Found!"]);
+        }else{
+             return response()->json(["data"=>$customer]);
+        }
     }
 
     /**
@@ -54,8 +72,19 @@ class CustomerController extends Controller
     public function update(Request $request, $id)
     {
         //
-        return Customer::find($id)->update($request->all());
-
+        $customer=Customer::find($id);
+        if(is_null($customer)){
+           return response()->json(
+               ['Error'=>"Customer Not Found!"],400
+           );
+        }
+       $customer->update($request->all());
+       $status=$customer->save();
+       if($status){
+           return response()->json(['data'=>$customer],200);
+       }else{
+           return response()->json(['Error'=>"Customer Update Failed!"],400);
+       }
     }
 
     /**
@@ -66,8 +95,13 @@ class CustomerController extends Controller
      */
     public function destroy($id)
     {
-        //
-        Customer:: where('category_id',$id)->delete();;
-
+        //delete customer with given id number
+        $customer=Customer::find($id);
+        if(is_null($customer)){
+            return response()->json(['Error'=>"Customer with id ".$id." Not Found!"],400);
+        }else{
+            Customer:: where('customer_id',$id)->delete();
+            return response()->json(["data" => "Customer successfuly deleted!"],200);
+        }
     }
 }

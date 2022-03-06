@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Staff;
+use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
 
 class StaffController extends Controller
@@ -15,7 +16,12 @@ class StaffController extends Controller
     public function index()
     {
         //
-        return Staff::all();
+        $staffs=Staff::all();
+        if(count($staffs)==0){
+            return response()->json(['Error'=>"Staffs Not Found!"]);
+        }else{
+             return response()->json(["data"=>$staffs],200);
+        }
     }
 
     /**
@@ -27,8 +33,16 @@ class StaffController extends Controller
     public function store(Request $request)
     {
         //
-        return Staff::create($request->all());
+        $request->validate(
+            ['first_name'=>'required','last_name'=>'required','username'=>'required','password'=>'required','address'=>'required','email'=>'required','phone'=>'required','role_id'=>'required']
+        );
 
+        try {
+            $staff=Staff::create($request->all());
+            return response()->json(["data"=>$staff], 200);
+        }catch(QueryException $e){
+            return response()->json(["Error"=>$e->getMessage()],400);
+        }
     }
 
     /**
@@ -40,8 +54,12 @@ class StaffController extends Controller
     public function show($id)
     {
         //
-        return Staff::find($id);
-    }
+        $staff=Staff::find($id);
+        if(is_null($staff)){
+            return response()->json(['Error'=>"Staff Not Found!"]);
+        }else{
+             return response()->json(["data"=>$staff]);
+        }    }
 
     /**
      * Update the specified resource in storage.
@@ -53,8 +71,20 @@ class StaffController extends Controller
     public function update(Request $request, $id)
     {
         //
-        return Staff::find($id)->update($request->all());
+        $staff=Staff::find($id);
+        if(is_null($staff)){
+           return response()->json(
+               ['Error'=>"Staff Not Found!",400]
+           );
 
+        }
+       $staff->update($request->all());
+       $status=$staff->save();
+       if($status){
+           return response()->json(['data'=>$staff],200);
+       }else{
+           return response()->json(['Error'=>"Staff Update Failed!"],400);
+       }
     }
 
     /**
@@ -66,7 +96,13 @@ class StaffController extends Controller
     public function destroy($id)
     {
         //
-        Staff:: where('category_id',$id)->delete();;
+        $staff=Staff::find($id);
+        if(is_null($staff)){
+            return response()->json(['Error'=>"Staff with id ".$id." Not Found!"],400);
+        }else{
+            Staff:: where('customer_id',$id)->delete();
+            return response()->json(["data" => "Staff successfuly deleted!"],200);
+        }
 
     }
 }

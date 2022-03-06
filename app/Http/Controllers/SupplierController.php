@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Supplier;
+use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
 
 class SupplierController extends Controller
@@ -15,8 +16,12 @@ class SupplierController extends Controller
     public function index()
     {
         //
-        return Supplier::all();
-    }
+        $suppliers=Supplier::all();
+        if(count($suppliers)==0){
+            return response()->json(['Error'=>"Suppliers Not Found!"]);
+        }else{
+             return response()->json(["data"=>$suppliers],200);
+        }    }
 
     /**
      * Store a newly created resource in storage.
@@ -27,8 +32,15 @@ class SupplierController extends Controller
     public function store(Request $request)
     {
         //
-        return Supplier::create($request->all());
-
+        $request->validate(
+            ['name'=>'required','username'=>'required','password'=>'required','address'=>'required','email'=>'required','phone'=>'required','fax'=>'required']
+        );
+        try {
+            $supplier=Supplier::create($request->all());
+            return response()->json(["data"=>$supplier], 200);
+        }catch(QueryException $e){
+            return response()->json(["Error"=>$e->getMessage()],400);
+        }
     }
 
     /**
@@ -40,8 +52,12 @@ class SupplierController extends Controller
     public function show($id)
     {
         //
-        return Supplier::find($id);
-    }
+        $supplier=Supplier::find($id);
+        if(is_null($supplier)){
+            return response()->json(['Error'=>"Supplier Not Found!"]);
+        }else{
+             return response()->json(["data"=>$supplier]);
+        }    }
 
     /**
      * Update the specified resource in storage.
@@ -52,9 +68,21 @@ class SupplierController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
-        return Supplier::find($id)->update($request->all());
+        //update supplier
+        $supplier=Supplier::find($id);
+        if(is_null($supplier)){
+           return response()->json(
+               ['Error'=>"Supplier Not Found!"],400
+           );
 
+        }
+       $supplier->update($request->all());
+       $status=$supplier->save();
+       if($status){
+           return response()->json(['data'=>$supplier],200);
+       }else{
+           return response()->json(['Error'=>"Supplier Update Failed!"],400);
+       }
     }
 
     /**
@@ -65,8 +93,13 @@ class SupplierController extends Controller
      */
     public function destroy($id)
     {
-        //
-        Supplier:: where('category_id',$id)->delete();;
-
+        //delete supplier
+        $supplier=Supplier::find($id);
+        if(is_null($supplier)){
+            return response()->json(['Error'=>"Supplier with id ".$id." Not Found!"],400);
+        }else{
+            Supplier:: where('supplier_id',$id)->delete();
+            return response()->json(["data" => "Supplier successfuly deleted!"],200);
+        }
     }
 }

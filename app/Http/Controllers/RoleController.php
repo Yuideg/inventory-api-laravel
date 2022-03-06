@@ -16,8 +16,13 @@ class RoleController extends Controller
     public function index()
     {
         //
-        return Role::all();
-    }
+        $roles=Role::all();
+        if(count($roles)==0){
+            return response()->json(['Error'=>"Roles Not Found!"]);
+        }else{
+             return response()->json(["data"=>$roles],200);
+        }
+     }
 
     /**
      * Store a newly created resource in storage.
@@ -33,7 +38,7 @@ class RoleController extends Controller
         );
         try {
             $role=Role::create($request->all());
-            return response()->json(["Role"=>$role], 200);
+            return response()->json(["data"=>$role], 200);
         }catch(QueryException $e){
             return response()->json(["Error"=>$e->getMessage()],400);
         }
@@ -48,7 +53,12 @@ class RoleController extends Controller
     public function show($id)
     {
         //
-        return Role::find($id);
+        $role=Role::find($id);
+        if(is_null($role)){
+            return response()->json(['Error'=>"Role Not Found!"]);
+        }else{
+             return response()->json(["data"=>$role]);
+        }
     }
 
     /**
@@ -86,8 +96,14 @@ class RoleController extends Controller
      */
     public function destroy($id)
     {
-        //
-        Role::where('role_id', $id)->delete();
+        //delete
+        $role=Role::find($id);
+        if(is_null($role)){
+            return response()->json(['Error'=>"Role with id ".$id." Not Found!"],400);
+        }else{
+            Role:: where('role_id',$id)->delete();
+            return response()->json(["data" => "Roles successfuly deleted!"],200);
+        }
 
     }
 }

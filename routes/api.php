@@ -9,7 +9,9 @@ use App\Http\Controllers\RoleController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\StaffController;
 use App\Http\Controllers\SupplierController;
+use App\Models\Staff;
 
 /*
 |--------------------------------------------------------------------------
@@ -23,7 +25,7 @@ use App\Http\Controllers\SupplierController;
 */
 Route::resource("roles",RoleController::class);
 Route::resource("products",ProductController::class);
-Route::resource("staff",RoleController::class);
+Route::resource("staff",StaffController::class);
 Route::resource("payments",PaymentController::class);
 Route::resource("orders",OrderController::class);
 Route::resource("order_details",OrderDetailController::class);

@@ -8,10 +8,10 @@ use Illuminate\Database\Eloquent\Model;
 class Role extends Model
 {
     use HasFactory;
-    protected $fillable=[''];
+    protected $primaryKey = 'role_id';
+    protected $fillable=['name'];
     protected $hidden = ['deleted_at','created_at','updated_at'];
 
-    protected $primaryKey = 'role_id';
 
 
 

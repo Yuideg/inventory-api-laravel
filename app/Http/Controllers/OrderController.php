@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Customer;
 use App\Models\Order;
+use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
 
 class OrderController extends Controller
@@ -16,7 +17,12 @@ class OrderController extends Controller
     public function index()
     {
         //
-        return Order::all();
+        $orders=Order::all();
+        if(count($orders)==0){
+            return response()->json(['Error'=>"Orders Record Not Found!"]);
+        }else{
+             return response()->json(["data"=>$orders],200);
+        }
     }
 
     /**
@@ -28,8 +34,15 @@ class OrderController extends Controller
     public function store(Request $request)
     {
         //
-        return Order::create($request->all());
-
+        $request->validate(
+            ['date_of_order' => 'required','order_detail'=>'required']
+        );
+        try {
+            $order=Order::create($request->all());
+            return response()->json(["data"=>$order], 200);
+        }catch(QueryException $e){
+            return response()->json(["Error"=>$e->getMessage()], 400);
+        }
     }
 
     /**
@@ -41,7 +54,12 @@ class OrderController extends Controller
     public function show($id)
     {
         //
-        return Order::find($id);
+        $order=Order::find($id);
+        if(is_null($order)){
+            return response()->json(['Error'=>"Order record Not Found!"]);
+        }else{
+             return response()->json(["data"=>$order]);
+        }
     }
 
     /**
@@ -54,8 +72,20 @@ class OrderController extends Controller
     public function update(Request $request, $id)
     {
         //
-        return Order::find($id)->update($request->all());
+        $order=Order::find($id);
+        if(is_null($order)){
+           return response()->json(
+               ['Error'=>"Order Record Not Found!"],400
+           );
 
+        }
+       $order->update($request->all());
+       $status=$order->save();
+       if($status){
+           return response()->json(['data'=>$order],200);
+       }else{
+           return response()->json(['Error'=>"Order Update Failed!"],400);
+       }
     }
 
     /**
@@ -67,7 +97,12 @@ class OrderController extends Controller
     public function destroy($id)
     {
         //
-        Order:: where('category_id',$id)->delete();;
-
+        $order=Order::find($id);
+        if(is_null($order)){
+            return response()->json(['Error'=>"Order with id ".$id." Not Found!"],400);
+        }else{
+            Order:: where('order_id',$id)->delete();
+            return response()->json(["data" => "Order successfuly deleted!"],200);
+        }
     }
 }
