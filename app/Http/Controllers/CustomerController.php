@@ -6,6 +6,7 @@ use App\Models\Customer;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
 
+
 class CustomerController extends Controller
 {
     /**
@@ -38,6 +39,7 @@ class CustomerController extends Controller
             ['first_name'=>'required','last_name'=>'required','username'=>'required','password'=>'required','address'=>'required','email'=>'required','phone'=>'required','staff_id'=>'required']
         );
         try {
+            $request->password=bcrypt($request->password);
             $customer=Customer::create($request->all());
             return response()->json(["data"=>$customer], 200);
         }catch(QueryException $e){

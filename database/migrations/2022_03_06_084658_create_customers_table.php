@@ -23,6 +23,7 @@ return new class extends Migration
             $table->string('email')->unique();
             $table->string('phone')->unique();
             $table->foreignId('staff_id')->constrained('staff','staff_id')->cascadeOnUpdate()->cascadeOnDelete();
+            $table->foreignId('role_id')->constrained('roles','role_id')->cascadeOnUpdate()->cascadeOnDelete();
             $table->timestamps();
             $table->softDeletes();
         });
